@@ -175,7 +175,7 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	var bingo_card_data = {
 		"cells":[]
 	}
-	
+	var bingo_card:Array = []
 	var b_array:Array = []
 	var i_array:Array = []
 	var n_array:Array = []
