@@ -35,6 +35,7 @@ func item_selected(index:int):
 	pass
 
 master func build_card(bingo_card_data:Array, grid_width:int = 0):
+	print("SERVER GAVE US DATA SO WE CAN BUILD A CARD")
 	grid_size = grid_width
 
 	max_columns = grid_width

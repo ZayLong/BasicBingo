@@ -103,6 +103,7 @@ func _network_peer_connected(id:int):
 	print("A USER WITH ID: %s CONNECTED" % [id])
 	# a new user has joined, the server must now give this player a bingo card
 	if get_tree().is_network_server():
+		print("START GENERTATING DATA FOR NEW PLAYER")
 		generate_bingo_card(bingo_basket, id)
 	pass
 
@@ -228,7 +229,6 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 		all_player_data[new_player_id].card.append(card_cell.new())
 		all_player_data[new_player_id].card.back().name = cell
 		all_player_data[new_player_id].card.back().filled = false
-# {"name": cell, "filled": false}
 		pass
 
 	
