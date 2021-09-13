@@ -28,7 +28,7 @@ const MAX_PEERS = 12
 
 var peer = null
 
-var SERVER_IP = IP.get_local_addresses().front()
+var SERVER_IP = "basic-bingo.local"
 
 func _ready():
 	# allows us to get "true" random numbers by using a time based seed.
