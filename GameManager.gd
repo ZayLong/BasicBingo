@@ -9,9 +9,31 @@ onready var evaluate_button:Button = $HUD/Button2
 
 var bingo_basket:Array = []
 var called_balls:Array = []
-var bingo_cards:Array = []
-var current_number:String
 
+var current_number:String
+var grid_size:int = 3
+
+# PLAYER DATA STRUCT
+var all_player_data = {
+	"1": player_data
+}
+
+var player_data = {
+	"has_won": false,
+	"card": card
+}
+
+var card = {
+	"cells":[
+		cell
+	]
+}
+
+var cell = {
+	"name":"00",
+	"filled":false
+}
+# PLAYER DATA STRUCT END
 signal picked_ball_event
 
 # to start...first to connnect becomes host, yet cannot be a "player" in the sense that they will not be given a bingo card
@@ -34,7 +56,7 @@ func _ready():
 	# allows us to get "true" random numbers by using a time based seed.
 	# only needs to be ran once in the entire application
 	randomize()
-	#fill_basket(3)
+	fill_basket(grid_size)
 	
 	peer = NetworkedMultiplayerENet.new()
 	# Running on the headless server platform
@@ -51,6 +73,11 @@ func _ready():
 		get_tree().network_peer = peer
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
+			# create player
+		if bingo_card:
+			var x = bingo_card.instance()
+			add_child(x)
+			
 
 
 
@@ -60,12 +87,12 @@ func _ready():
 	# create player
 	if bingo_card && false:
 		var x = bingo_card.instance()
-		x._init(bingo_basket, 3)
+		x._init(bingo_basket, grid_size)
 		# connect our picked_ball event to our newly created bingo cards set_current_ball setter method
 		# this way whenever we pick a ball, we will emit a signal telling all our subscribers what we picked
 		self.connect("picked_ball_event", x, "set_current_ball")
 		add_child(x)
-		bingo_cards.append(x)
+
 	
 	# UI button event setup
 	if pick_ball_button:
@@ -78,6 +105,9 @@ func _ready():
 
 func _network_peer_connected(id:int):
 	print("A USER WITH ID: %s CONNECTED" % [id])
+	# a new user has joined, the server must now give this player a bingo card
+	if get_tree().is_network_server():
+		generate_bingo_card(bingo_basket, id)
 	pass
 
 func _network_peer_disconnected(id:int):
@@ -136,8 +166,80 @@ master func pick_ball()->void:
 	pass
 
 # player may request for their card to be evaluated
-remote func evaluate_bingo_cards()->void:
-	for card in bingo_cards:
-		
+remote func evaluate_bingo_cards(id)->void:
+	pass
+
+func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
+	if bingo_basket.size() == 0:
+		return
+	var bingo_card_data = {
+		"cells":[]
+	}
+	
+	var b_array:Array = []
+	var i_array:Array = []
+	var n_array:Array = []
+	var g_array:Array = []
+	var o_array:Array = []
+	
+	# filter and sort out out the balls into different arrays based on letter
+	for ball in bingo_basket:
+		# do a search within basket_instance for an element that starts with B
+		if "B" in ball:
+			b_array.append(ball)
+		if "I" in ball:
+			i_array.append(ball)
+		if "N" in ball:
+			n_array.append(ball)
+		if "G" in ball:
+			g_array.append(ball)
+		if "O" in ball:
+			o_array.append(ball)
 		pass
+	
+	# pick one of these "B" elements at random
+	# remove said element from basket_instance
+	# add element to bingo_card array
+	# iterate 25 times because we have 25 times on the card
+	# 
+	for n in grid_size:
+		if !b_array.empty():
+			bingo_card.append(b_array[randi() % b_array.size()])
+			b_array.remove(b_array.find(bingo_card.back()))
+		
+		if !i_array.empty():
+			bingo_card.append(i_array[randi() % i_array.size()])
+			i_array.remove(i_array.find(bingo_card.back()))
+		
+		if !n_array.empty():
+			bingo_card.append(n_array[randi() % n_array.size()])
+			n_array.remove(n_array.find(bingo_card.back()))
+		
+		if !g_array.empty():
+			bingo_card.append(g_array[randi() % g_array.size()])
+			g_array.remove(g_array.find(bingo_card.back()))
+		
+		if !o_array.empty():
+			bingo_card.append(o_array[randi() % o_array.size()])
+			o_array.remove(o_array.find(bingo_card.back()))
+		pass
+	
+	# ok we have our bingo card array now.
+	# next thing to do is populate our ItemList with our bingo_card array
+	
+	for cell in bingo_card:
+		bingo_card_data["cells"].append({"name": cell, "filled": false})
+		pass
+	
+	# add a new player with default data
+	all_player_data[new_player_id] = player_data
+	
+	#update the players fresh card data
+	all_player_data[new_player_id]["card"]["cells"].append_array(bingo_card_data["cells"])
+	
+	# we now have an ongoing record of the players card data, 
+	# we will use this version to verify whether or not they have a completed row
+	# now it's time to give the player their data so they can build out a UI based on it
+	rpc_id(new_player_id, "build_card",all_player_data[new_player_id]["card"]["cells"], grid_size)
+	
 	pass

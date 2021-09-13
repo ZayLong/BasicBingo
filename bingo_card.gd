@@ -11,18 +11,16 @@ var bingo_card_data = {
 var current_ball setget set_current_ball
 
 # CORE =========================================================================
-func _init(bingo_basket:Array = [], grid_width:int = 0):
-	grid_size = grid_width
-	current_basket = bingo_basket
-	max_columns = grid_width
-	pass
 
 func _ready():
-	generate_bingo_card(current_basket)
+	# generate_bingo_card(current_basket)
 	connect("item_selected", self, "item_selected")
 	pass
 
 # METHODS ======================================================================
+
+
+
 func set_current_ball(ball):
 	current_ball = ball
 	pass
@@ -36,6 +34,17 @@ func item_selected(index:int):
 		evaluate_card(index)
 	pass
 
+master func build_card(bingo_card_data:Array, grid_width:int = 0):
+	grid_size = grid_width
+
+	max_columns = grid_width
+	for cell in bingo_card_data:
+		self.add_item(cell["name"])
+		if cell["filled"] == true:
+			var i = bingo_card_data.find(cell)
+			set_item_disabled(i, true)
+			set_item_selectable(i, false)
+	pass
 # evaluate bingo card based on the position of a given cell
 # basically does the cell we just filled in complete a row or column (also generically checks for diagnal matches)
 func evaluate_card(index:int)->void:
