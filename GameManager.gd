@@ -14,14 +14,14 @@ var current_number:String
 var grid_size:int = 3
 
 # PLAYER DATA STRUCT
-class cell:
+class card_cell:
 	var name:String = "00"
 	var filled:bool = false
 
 class player_data:
 	var has_won:bool = false
 	var card:Array = [
-		cell.new()
+		card_cell.new()
 	]
 
 var all_player_data = {
@@ -222,16 +222,15 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	
 	# ok we have our bingo card array now.
 	# next thing to do is populate our ItemList with our bingo_card array
-	
-	for cell in bingo_card:
-		bingo_card_data["cells"].append({"name": cell, "filled": false})
-		pass
-	
-	# add a new player with default data
 	all_player_data[new_player_id] = player_data.new()
-	
-	#update the players fresh card data
-	all_player_data[new_player_id].card.append_array(bingo_card_data["cells"])
+	all_player_data[new_player_id].card.clear()
+	for cell in bingo_card:
+		all_player_data[new_player_id].card.append(card_cell.new())
+		all_player_data[new_player_id].card.back().name = cell
+		all_player_data[new_player_id].card.back().filled = false
+# {"name": cell, "filled": false}
+		pass
+
 	
 	# we now have an ongoing record of the players card data, 
 	# we will use this version to verify whether or not they have a completed row
