@@ -28,7 +28,7 @@ const MAX_PEERS = 12
 
 var peer = null
 
-var SERVER_IP = "68.55.157.177"
+var SERVER_IP = IP.get_local_addresses().front()
 
 func _ready():
 	# allows us to get "true" random numbers by using a time based seed.
@@ -44,6 +44,7 @@ func _ready():
 		get_tree().set_network_peer(peer)
 		get_tree().connect("network_peer_connected", self,"_network_peer_connected")
 		get_tree().connect("network_peer_disconnected", self, "_network_peer_disconnected")
+		
 	else:
 		print("CONNECTING TO SERVER %s ON PORT %s" % [SERVER_IP, DEFAULT_PORT])
 		peer.create_client(SERVER_IP, DEFAULT_PORT)
@@ -79,7 +80,7 @@ func _network_peer_connected(id:int):
 	print("A USER WITH ID: %s CONNECTED" % [id])
 	pass
 
-func _network_peer_disconneted(id:int):
+func _network_peer_disconnected(id:int):
 	print("A USER WITH ID: %s DISCONNECTED" % [id])
 	pass
 
