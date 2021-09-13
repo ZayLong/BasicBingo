@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://bingo_card.gd" type="Script" id=1]
+
+[node name="bingo_card" type="ItemList"]
+margin_left = 11.0
+margin_top = 20.0
+margin_right = 629.0
+margin_bottom = 473.0
+max_text_lines = 3
+max_columns = 5
+same_column_width = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
