@@ -34,7 +34,7 @@ func item_selected(index:int):
 		evaluate_card(index)
 	pass
 
-master func build_card(bingo_card_data:Array, grid_width:int = 0):
+remote func build_card(bingo_card_data:Array, grid_width:int = 0):
 	print("SERVER GAVE US DATA SO WE CAN BUILD A CARD")
 	grid_size = grid_width
 
