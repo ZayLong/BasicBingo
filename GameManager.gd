@@ -14,25 +14,21 @@ var current_number:String
 var grid_size:int = 3
 
 # PLAYER DATA STRUCT
-var all_player_data = {
-	"1": player_data
-}
+class cell:
+	var name:String = "00"
+	var filled:bool = false
 
-var player_data = {
-	"has_won": false,
-	"card": card
-}
-
-var card = {
-	"cells":[
-		cell
+class player_data:
+	var has_won:bool = false
+	var card:Array = [
+		cell.new()
 	]
+
+var all_player_data = {
+	"1": player_data.new()
 }
 
-var cell = {
-	"name":"00",
-	"filled":false
-}
+
 # PLAYER DATA STRUCT END
 signal picked_ball_event
 
@@ -56,7 +52,6 @@ func _ready():
 	# allows us to get "true" random numbers by using a time based seed.
 	# only needs to be ran once in the entire application
 	randomize()
-	fill_basket(grid_size)
 	
 	peer = NetworkedMultiplayerENet.new()
 	# Running on the headless server platform
@@ -66,6 +61,7 @@ func _ready():
 		get_tree().set_network_peer(peer)
 		get_tree().connect("network_peer_connected", self,"_network_peer_connected")
 		get_tree().connect("network_peer_disconnected", self, "_network_peer_disconnected")
+		fill_basket(grid_size)
 		
 	else:
 		print("CONNECTING TO SERVER %s ON PORT %s" % [SERVER_IP, DEFAULT_PORT])
@@ -232,14 +228,14 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 		pass
 	
 	# add a new player with default data
-	all_player_data[new_player_id] = player_data
+	all_player_data[new_player_id] = player_data.new()
 	
 	#update the players fresh card data
-	all_player_data[new_player_id]["card"]["cells"].append_array(bingo_card_data["cells"])
+	all_player_data[new_player_id].card.append_array(bingo_card_data["cells"])
 	
 	# we now have an ongoing record of the players card data, 
 	# we will use this version to verify whether or not they have a completed row
 	# now it's time to give the player their data so they can build out a UI based on it
-	rpc_id(new_player_id, "build_card",all_player_data[new_player_id]["card"]["cells"], grid_size)
+	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
 	
 	pass
