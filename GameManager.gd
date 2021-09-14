@@ -18,7 +18,7 @@ var ready_players:Array = []
 
 # PLAYER DATA STRUCT
 var all_player_data = {
-	"1": PlayerDataStruct.player_data.new()
+	"1": {"has_won":false,"card":[]}
 }
 
 
@@ -205,12 +205,11 @@ func generate_bingo_card(new_player_id:int)->void:
 	
 	# ok we have our bingo card array now.
 	# next thing to do is populate our ItemList with our bingo_card array
-	all_player_data[new_player_id] = PlayerDataStruct.player_data.new()
-	all_player_data[new_player_id].card.clear()
+	all_player_data[new_player_id] = {"has_won":false,"card":[]}
+
 	for cell in bingo_card:
-		all_player_data[new_player_id].card.append(PlayerDataStruct.card_cell.new())
-		all_player_data[new_player_id].card.back().name = cell
-		all_player_data[new_player_id].card.back().filled = false
+		all_player_data[new_player_id]["card"].append({"name": cell, "filled":false})
+
 		pass
 
 	

@@ -41,9 +41,8 @@ func build_card(player_card_data:Array, grid_width:int = 0):
 
 	max_columns = grid_width
 	for cell in player_card_data:
-		cell = cell as PlayerDataStruct.card_cell
-		self.add_item(cell.name)
-		if cell.filled == true:
+		self.add_item(cell["name"])
+		if cell["filled"] == true:
 			var i = player_card_data.find(cell)
 			set_item_disabled(i, true)
 			set_item_selectable(i, false)
