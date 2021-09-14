@@ -81,7 +81,6 @@ func _network_peer_connected(id:int):
 	print("A USER WITH ID: %s CONNECTED" % [id])
 	# a new user has joined, the server must now give this player a bingo card
 	if get_tree().is_network_server():
-		print("START GENERTATING DATA FOR NEW PLAYER")
 		players.append(id)
 	pass
 
@@ -229,6 +228,8 @@ remote func build_card(player_data:Array):
 
 remote func player_is_ready():
 	var id = get_tree().get_rpc_sender_id()
+	print("PLAYER: %s IS READY" % id)
+	
 	ready_players.append(id)
 	generate_bingo_card(id)
 	
