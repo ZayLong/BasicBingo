@@ -1,4 +1,5 @@
 extends ItemList
+const PlayerDataStruct =  preload("res://player_data_struct.gd")
 class_name Bingo_Card
 # PROPERTIES ===================================================================
 var item_list
@@ -34,15 +35,16 @@ func item_selected(index:int):
 		evaluate_card(index)
 	pass
 
-func build_card(bingo_card_data:Array, grid_width:int = 0):
+func build_card(player_card_data:Array, grid_width:int = 0):
 	print("SERVER GAVE US DATA SO WE CAN BUILD A CARD")
 	grid_size = grid_width
 
 	max_columns = grid_width
-	for cell in bingo_card_data:
-		self.add_item(cell["name"])
-		if cell["filled"] == true:
-			var i = bingo_card_data.find(cell)
+	for cell in player_card_data:
+		cell = cell as PlayerDataStruct.card_cell
+		self.add_item(cell.name)
+		if cell.filled == true:
+			var i = player_card_data.find(cell)
 			set_item_disabled(i, true)
 			set_item_selectable(i, false)
 	pass

@@ -1,6 +1,6 @@
 extends Node2D
 
-
+const PlayerDataStruct =  preload("res://player_data_struct.gd")
 export(PackedScene) var bingo_card
 
 onready var current_number_display:Label = $HUD/Label
@@ -14,18 +14,8 @@ var current_number:String
 var grid_size:int = 3
 
 # PLAYER DATA STRUCT
-class card_cell:
-	var name:String = "00"
-	var filled:bool = false
-
-class player_data:
-	var has_won:bool = false
-	var card:Array = [
-		card_cell.new()
-	]
-
 var all_player_data = {
-	"1": player_data.new()
+	"1": PlayerDataStruct.player_data.new()
 }
 
 
@@ -223,10 +213,10 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	
 	# ok we have our bingo card array now.
 	# next thing to do is populate our ItemList with our bingo_card array
-	all_player_data[new_player_id] = player_data.new()
+	all_player_data[new_player_id] = PlayerDataStruct.player_data.new()
 	all_player_data[new_player_id].card.clear()
 	for cell in bingo_card:
-		all_player_data[new_player_id].card.append(card_cell.new())
+		all_player_data[new_player_id].card.append(PlayerDataStruct.card_cell.new())
 		all_player_data[new_player_id].card.back().name = cell
 		all_player_data[new_player_id].card.back().filled = false
 		pass
@@ -240,7 +230,7 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
 	pass
 # basically a wrapper for the build_card func on our bingo card
-master func build_card(player_data:Array, grid_size:int):
+remote func build_card(player_data:Array, grid_size:int):
 	print("BUILD_CARD")
 	if get_node_or_null("HUD/bingo_card"):
 		print("FIND BINGO CARD AND TELL IT TO BUILD_CARD")
