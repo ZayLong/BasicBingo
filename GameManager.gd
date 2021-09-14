@@ -72,7 +72,7 @@ func _ready():
 			# create player
 		if bingo_card:
 			var x = bingo_card.instance()
-			add_child(x)
+			$HUD.add_child(x)
 			
 
 
@@ -235,6 +235,8 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	# we now have an ongoing record of the players card data, 
 	# we will use this version to verify whether or not they have a completed row
 	# now it's time to give the player their data so they can build out a UI based on it
-	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
+	print("SEND RPC CALL TO ID: %s" % [new_player_id])
 	
+	get_node("HUD/bingo_card").rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
 	pass
+	

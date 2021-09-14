@@ -1,23 +1,13 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://GameManager.gd" type="Script" id=1]
 [ext_resource path="res://bingo_card.tscn" type="PackedScene" id=2]
-[ext_resource path="res://bingo_card.gd" type="Script" id=3]
 
 [node name="GameManager" type="Node2D"]
 script = ExtResource( 1 )
 bingo_card = ExtResource( 2 )
 
 [node name="HUD" type="CanvasLayer" parent="."]
-
-[node name="Bingo_Card" type="ItemList" parent="HUD"]
-visible = false
-margin_right = 541.0
-margin_bottom = 438.0
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Button" type="Button" parent="HUD"]
 margin_left = 635.0
