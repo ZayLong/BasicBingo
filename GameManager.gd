@@ -64,11 +64,7 @@ func _ready():
 		get_tree().network_peer = peer
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
-			# create player
-		if bingo_card_scene:
-			var x = bingo_card_scene.instance()
-			$HUD.add_child(x)
-		rpc_id(1, "player_is_ready") # tell the server we're ready for whatevers next
+
 
 	# UI button event setup
 	if pick_ball_button:
@@ -98,6 +94,13 @@ func _connection_failed():
 
 func _connected_to_server():
 	print("CONNECTION SUCCESS!")
+	
+	# create player
+	if bingo_card_scene:
+		var x = bingo_card_scene.instance()
+		$HUD.add_child(x)
+	print("WE ARE READY, LETS TELL THE SERVER")
+	rpc_id(1, "player_is_ready") # tell the server we're ready for whatevers next
 	pass
 # populate all the numbers/letter
 master func fill_basket(number_of_balls:int)->void:
@@ -216,7 +219,7 @@ func generate_bingo_card(new_player_id:int)->void:
 	# now it's time to give the player their data so they can build out a UI based on it
 	print("SEND RPC CALL TO ID: %s" % [new_player_id])
 	
-	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
+	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card)
 	pass
 # basically a wrapper for the build_card func on our bingo card
 remote func build_card(player_data:Array):
