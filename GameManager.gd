@@ -1,7 +1,7 @@
 extends Node2D
 
 const PlayerDataStruct =  preload("res://player_data_struct.gd")
-export(PackedScene) var bingo_card
+export(PackedScene) var bingo_card_scene
 
 onready var current_number_display:Label = $HUD/Label
 onready var pick_ball_button:Button = $HUD/Button
@@ -12,6 +12,9 @@ var called_balls:Array = []
 
 var current_number:String
 var grid_size:int = 3
+
+var players:Array = []
+var ready_players:Array = []
 
 # PLAYER DATA STRUCT
 var all_player_data = {
@@ -60,26 +63,11 @@ func _ready():
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
 			# create player
-		if bingo_card:
-			var x = bingo_card.instance()
+		if bingo_card_scene:
+			var x = bingo_card_scene.instance()
 			$HUD.add_child(x)
-			
+		rpc_id(1, "player_is_ready") # tell the server we're ready for whatevers next
 
-
-
-
-
-	
-	# create player
-	if bingo_card && false:
-		var x = bingo_card.instance()
-		x._init(bingo_basket, grid_size)
-		# connect our picked_ball event to our newly created bingo cards set_current_ball setter method
-		# this way whenever we pick a ball, we will emit a signal telling all our subscribers what we picked
-		self.connect("picked_ball_event", x, "set_current_ball")
-		add_child(x)
-
-	
 	# UI button event setup
 	if pick_ball_button:
 		# connect the buttons pressed event to our pick_ball method
@@ -94,11 +82,13 @@ func _network_peer_connected(id:int):
 	# a new user has joined, the server must now give this player a bingo card
 	if get_tree().is_network_server():
 		print("START GENERTATING DATA FOR NEW PLAYER")
-		generate_bingo_card(bingo_basket, id)
+		players.append(id)
 	pass
 
 func _network_peer_disconnected(id:int):
 	print("A USER WITH ID: %s DISCONNECTED" % [id])
+	players.erase(id)
+	ready_players.erase(id)
 	pass
 
 func _connection_failed():
@@ -156,12 +146,10 @@ master func pick_ball()->void:
 remote func evaluate_bingo_cards(id)->void:
 	pass
 
-func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
+func generate_bingo_card(new_player_id:int)->void:
 	if bingo_basket.size() == 0:
 		return
-	var bingo_card_data = {
-		"cells":[]
-	}
+
 	var bingo_card:Array = []
 	var b_array:Array = []
 	var i_array:Array = []
@@ -230,7 +218,7 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
 	pass
 # basically a wrapper for the build_card func on our bingo card
-remote func build_card(player_data:Array, grid_size:int):
+remote func build_card(player_data:Array):
 	print("BUILD_CARD")
 	if get_node_or_null("HUD/bingo_card"):
 		print("FIND BINGO CARD AND TELL IT TO BUILD_CARD")
@@ -238,3 +226,10 @@ remote func build_card(player_data:Array, grid_size:int):
 	else:
 		print("COULD NOT FIND NODE")
 	pass
+
+remote func player_is_ready():
+	var id = get_tree().get_rpc_sender_id()
+	ready_players.append(id)
+	generate_bingo_card(id)
+	
+	

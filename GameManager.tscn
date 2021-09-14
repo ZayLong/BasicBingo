@@ -5,7 +5,7 @@
 
 [node name="GameManager" type="Node2D"]
 script = ExtResource( 1 )
-bingo_card = ExtResource( 2 )
+bingo_card_scene = ExtResource( 2 )
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
