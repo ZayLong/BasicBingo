@@ -239,9 +239,11 @@ func generate_bingo_card(bingo_basket:Array, new_player_id:int)->void:
 	
 	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card, grid_size)
 	pass
-
+# basically a wrapper for the build_card func on our bingo card
 master func build_card(player_data:Array, grid_size:int):
+	print("BUILD_CARD")
 	if get_node_or_null("HUD/bingo_card"):
+		print("FIND BINGO CARD AND TELL IT TO BUILD_CARD")
 		get_node("HUD/bingo_card").build_card(player_data, grid_size)
 	else:
 		print("COULD NOT FIND NODE")
