@@ -50,10 +50,12 @@ func _ready():
 	# Running on the headless server platform
 	if OS.has_feature("Server"):
 		print("STARTING SERVER %s ON PORT %s" % [SERVER_IP, DEFAULT_PORT])
+
 		peer.create_server(DEFAULT_PORT, MAX_PEERS)
 		get_tree().set_network_peer(peer)
 		get_tree().connect("network_peer_connected", self,"_network_peer_connected")
 		get_tree().connect("network_peer_disconnected", self, "_network_peer_disconnected")
+		print("SERVER ID: %s" % get_tree().get_network_unique_id())
 		fill_basket(grid_size)
 		
 	else:
