@@ -21,6 +21,10 @@ var all_player_data = {
 }
 
 
+const START_GAME_TIMER_MAX:float = 10.0
+var start_game_timer:float = START_GAME_TIMER_MAX
+enum SERVER_GAME_STATE_ENUM {DEFAULT_STATE, SERVER_STARTED, GAME_START_COUNTDOWN, GAME_IN_PROCESS, GAME_OVER}
+var SERVER_GAME_STATE = SERVER_GAME_STATE_ENUM.DEFAULT_STATE
 # PLAYER DATA STRUCT END
 signal picked_ball_event
 
@@ -82,6 +86,16 @@ func _ready():
 
 	pass
 
+func _process(delta):
+	if is_network_master():
+		if SERVER_GAME_STATE == SERVER_GAME_STATE_ENUM.GAME_START_COUNTDOWN:
+			start_game_timer -= delta
+			print("SERVER COUNTDOWN: %s" % start_game_timer)
+			rpc("rpc_update_start_timer", start_game_timer)
+			if start_game_timer <= 0:
+				SERVER_GAME_STATE = SERVER_GAME_STATE_ENUM.GAME_IN_PROCESS
+	pass
+# SIGNAL EVENT FUNCS ===============================================================
 func _network_peer_connected(id:int):
 	print("A USER WITH ID: %s CONNECTED" % [id])
 	# a new user has joined, the server must now give this player a bingo card
@@ -112,6 +126,13 @@ func _connected_to_server():
 
 func _player_ready_to_start_button():
 	rpc_id(1, "rpc_player_ready_to_start")
+	start_game_button.disabled = true
+	pass
+
+# RPC FUNCTIONS ================================================================
+puppet func rpc_update_start_timer(time:float):
+	start_game_timer = time
+	print("CLIENT COUNTDOWN: %s" % start_game_timer)
 	pass
 
 remote func rpc_player_ready_to_start():
@@ -122,6 +143,7 @@ remote func rpc_player_ready_to_start():
 	
 	if players_ready_to_start.size() == players.size():
 		print("ALL THE PLAYERS ARE READY TO START THE GAME.")
+		SERVER_GAME_STATE = SERVER_GAME_STATE_ENUM.GAME_START_COUNTDOWN
 	pass
 
 # populate all the numbers/letter
@@ -168,10 +190,31 @@ master func pick_ball()->void:
 	emit_signal("picked_ball_event", current_number)
 	pass
 
+# basically a wrapper for the build_card func on our bingo card
+remote func build_card(player_data:Array):
+	print("BUILD_CARD")
+	var built_card:bool
+	if get_node_or_null("HUD/bingo_card"):
+		print("FIND BINGO CARD AND TELL IT TO BUILD_CARD")
+		built_card = get_node("HUD/bingo_card").build_card(player_data, grid_size)
+	else:
+		print("COULD NOT FIND NODE")
+	if built_card == true:
+		start_game_button.disabled = false
+	pass
+
+remote func player_is_ready():
+	var id = get_tree().get_rpc_sender_id()
+	print("PLAYER: %s IS READY" % id)
+	
+	ready_players.append(id)
+	generate_bingo_card(id)
+
+
 # player may request for their card to be evaluated
 remote func evaluate_bingo_cards(id)->void:
 	pass
-
+# NON NETWORK METHODS (METHODS NOT LIKELY TO BE CALLED OVER RPC==========================
 func generate_bingo_card(new_player_id:int)->void:
 	if bingo_basket.size() == 0:
 		return
@@ -243,24 +286,5 @@ func generate_bingo_card(new_player_id:int)->void:
 	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card)
 	pass
 
-# basically a wrapper for the build_card func on our bingo card
-remote func build_card(player_data:Array):
-	print("BUILD_CARD")
-	var built_card:bool
-	if get_node_or_null("HUD/bingo_card"):
-		print("FIND BINGO CARD AND TELL IT TO BUILD_CARD")
-		built_card = get_node("HUD/bingo_card").build_card(player_data, grid_size)
-	else:
-		print("COULD NOT FIND NODE")
-	if built_card == true:
-		start_game_button.disabled = false
-	pass
 
-remote func player_is_ready():
-	var id = get_tree().get_rpc_sender_id()
-	print("PLAYER: %s IS READY" % id)
-	
-	ready_players.append(id)
-	generate_bingo_card(id)
-	
 	
