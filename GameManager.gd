@@ -23,6 +23,8 @@ var all_player_data = {
 
 const START_GAME_TIMER_MAX:float = 10.0
 var start_game_timer:float = START_GAME_TIMER_MAX
+var last_time_sent:float = 0.0
+
 enum SERVER_GAME_STATE_ENUM {DEFAULT_STATE, SERVER_STARTED, GAME_START_COUNTDOWN, GAME_IN_PROCESS, GAME_OVER}
 var SERVER_GAME_STATE = SERVER_GAME_STATE_ENUM.DEFAULT_STATE
 # PLAYER DATA STRUCT END
@@ -90,8 +92,11 @@ func _process(delta):
 	if is_network_master():
 		if SERVER_GAME_STATE == SERVER_GAME_STATE_ENUM.GAME_START_COUNTDOWN:
 			start_game_timer -= delta
-			print("SERVER COUNTDOWN: %s" % start_game_timer)
-			rpc("rpc_update_start_timer", start_game_timer)
+			
+			if(last_time_sent != ceil(start_game_timer)):
+				print("SERVER COUNTDOWN: %s" % ceil(start_game_timer))
+				last_time_sent = ceil(start_game_timer)
+				rpc("rpc_update_start_timer", last_time_sent)
 			if start_game_timer <= 0:
 				SERVER_GAME_STATE = SERVER_GAME_STATE_ENUM.GAME_IN_PROCESS
 	pass
