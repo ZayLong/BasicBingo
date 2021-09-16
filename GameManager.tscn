@@ -29,6 +29,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Button3" type="Button" parent="HUD"]
+margin_left = 770.944
+margin_top = 186.669
+margin_right = 876.944
+margin_bottom = 216.669
+disabled = true
+text = "READY!"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Label" type="Label" parent="HUD"]
 margin_left = 636.0
 margin_top = 93.0

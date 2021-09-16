@@ -1,12 +1,11 @@
 extends Node2D
 
-const PlayerDataStruct =  preload("res://player_data_struct.gd")
 export(PackedScene) var bingo_card_scene
 
 onready var current_number_display:Label = $HUD/Label
 onready var pick_ball_button:Button = $HUD/Button
 onready var evaluate_button:Button = $HUD/Button2
-
+onready var start_game_button:Button = $HUD/Button3
 var bingo_basket:Array = []
 var called_balls:Array = []
 
@@ -15,7 +14,7 @@ var grid_size:int = 3
 
 var players:Array = []
 var ready_players:Array = []
-
+var players_ready_to_start:Array = []
 # PLAYER DATA STRUCT
 var all_player_data = {
 	"1": {"has_won":false,"card":[]}
@@ -53,7 +52,9 @@ func _ready():
 
 		peer.create_server(DEFAULT_PORT, MAX_PEERS)
 		get_tree().set_network_peer(peer)
+# warning-ignore:return_value_discarded
 		get_tree().connect("network_peer_connected", self,"_network_peer_connected")
+# warning-ignore:return_value_discarded
 		get_tree().connect("network_peer_disconnected", self, "_network_peer_disconnected")
 		print("SERVER ID: %s" % get_tree().get_network_unique_id())
 		fill_basket(grid_size)
@@ -62,16 +63,22 @@ func _ready():
 		print("CONNECTING TO SERVER %s ON PORT %s" % [SERVER_IP, DEFAULT_PORT])
 		peer.create_client(SERVER_IP, DEFAULT_PORT)
 		get_tree().network_peer = peer
+# warning-ignore:return_value_discarded
 		get_tree().connect("connection_failed", self, "_connection_failed")
+# warning-ignore:return_value_discarded
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
 
 
 	# UI button event setup
 	if pick_ball_button:
 		# connect the buttons pressed event to our pick_ball method
+# warning-ignore:return_value_discarded
 		pick_ball_button.connect("pressed", self, "pick_ball")
 	if evaluate_button:
+# warning-ignore:return_value_discarded
 		evaluate_button.connect("pressed", self, "evaluate_bingo_cards")
+	if start_game_button:
+		start_game_button.connect("pressed", self, "_player_ready_to_start_button")
 
 	pass
 
@@ -102,6 +109,21 @@ func _connected_to_server():
 	print("WE ARE READY, LETS TELL THE SERVER")
 	rpc_id(1, "player_is_ready") # tell the server we're ready for whatevers next
 	pass
+
+func _player_ready_to_start_button():
+	rpc_id(1, "rpc_player_ready_to_start")
+	pass
+
+remote func rpc_player_ready_to_start():
+	var id = get_tree().get_rpc_sender_id()
+	print("PLAYER: %s IS READY TO START THE GAME" % id)
+	if ready_players.has(id):
+		players_ready_to_start.append(id)
+	
+	if players_ready_to_start.size() == players.size():
+		print("ALL THE PLAYERS ARE READY TO START THE GAME.")
+	pass
+
 # populate all the numbers/letter
 master func fill_basket(number_of_balls:int)->void:
 	# clear out left over "balls" from our basket first
@@ -220,14 +242,18 @@ func generate_bingo_card(new_player_id:int)->void:
 	
 	rpc_id(new_player_id, "build_card",all_player_data[new_player_id].card)
 	pass
+
 # basically a wrapper for the build_card func on our bingo card
 remote func build_card(player_data:Array):
 	print("BUILD_CARD")
+	var built_card:bool
 	if get_node_or_null("HUD/bingo_card"):
 		print("FIND BINGO CARD AND TELL IT TO BUILD_CARD")
-		get_node("HUD/bingo_card").build_card(player_data, grid_size)
+		built_card = get_node("HUD/bingo_card").build_card(player_data, grid_size)
 	else:
 		print("COULD NOT FIND NODE")
+	if built_card == true:
+		start_game_button.disabled = false
 	pass
 
 remote func player_is_ready():

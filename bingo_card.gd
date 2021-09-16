@@ -1,5 +1,5 @@
 extends ItemList
-const PlayerDataStruct =  preload("res://player_data_struct.gd")
+
 class_name Bingo_Card
 # PROPERTIES ===================================================================
 var item_list
@@ -46,6 +46,8 @@ func build_card(player_card_data:Array, grid_width:int = 0):
 			var i = player_card_data.find(cell)
 			set_item_disabled(i, true)
 			set_item_selectable(i, false)
+	
+	return true
 	pass
 # evaluate bingo card based on the position of a given cell
 # basically does the cell we just filled in complete a row or column (also generically checks for diagnal matches)
